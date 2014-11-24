@@ -18,7 +18,7 @@ namespace SpotifyAcronymPlaylist.Controllers
 
 	    private string GetRedirectUri()
 	    {
-			string baseUri = string.Format("{0}://{1}{2}", HttpContext.Request.Url.Scheme, HttpContext.Request.Url.Authority, Url.Content("~"));
+			string baseUri = string.Format("{0}://{1}{2}", ControllerContext.HttpContext.Request.Url.Scheme, ControllerContext.HttpContext.Request.Url.Authority, Url.Content("~"));
 
 			string redirectUri = baseUri + "Auth/GetAuthenticationToken";
 

@@ -7,6 +7,22 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyAcronymPlaylist", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyAcronymPlaylist.Tests", "SpotifyAcronymPlaylist.Tests\SpotifyAcronymPlaylist.Tests.csproj", "{759468E1-3A01-4136-8E05-CEEF88AC2678}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishScripts", "PublishScripts", "{C12AA73E-6A31-48C4-96D2-55053CA72022}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\AzureWebsitePublishModule.psm1 = PublishScripts\AzureWebsitePublishModule.psm1
+		PublishScripts\Publish-WebApplicationWebsite.ps1 = PublishScripts\Publish-WebApplicationWebsite.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configurations", "{E1918863-43E9-496F-81C6-006774A6059E}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\Configurations\SpotifyAcronymPlaylist-WAWS-dev.json = PublishScripts\Configurations\SpotifyAcronymPlaylist-WAWS-dev.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F6B85DE7-BCFC-4E48-B043-E030B71EF132}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +40,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E1918863-43E9-496F-81C6-006774A6059E} = {C12AA73E-6A31-48C4-96D2-55053CA72022}
 	EndGlobalSection
 EndGlobal

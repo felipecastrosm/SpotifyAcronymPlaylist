@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using SpotifyAcronymPlaylist.Helpers;
 using Spotify = SpotifyWebAPI;
 
 namespace SpotifyAcronymPlaylist.Controllers
@@ -48,12 +49,25 @@ namespace SpotifyAcronymPlaylist.Controllers
 	    {
 		    if (String.IsNullOrEmpty(code))
 		    {
-				//TODO: Handle invalid code on callback
-
 			    if (!String.IsNullOrEmpty(error))
 			    {
-				    //TODO: Handle error on callback
+				    //TODO: Handle all possible error types on callback
+				    switch (error)
+				    {
+					    case "access_denied":
+							ErrorMessageHelper.SetMessage(ControllerContext.HttpContext.Session, "Spotify Acronym Playlist needs your permission to be able to create playlists. Please try again");
+						    break;
+						default:
+							ErrorMessageHelper.SetMessage(ControllerContext.HttpContext.Session, "An unrecornized error code was returned. Please try again");
+						    break;
+				    }
 			    }
+			    else
+			    {
+					ErrorMessageHelper.SetMessage(ControllerContext.HttpContext.Session, "An unexpected error ocurred during Spotify authentication. Please try again");
+			    }
+
+				return new RedirectResult("/");
 		    }
 
 		    Spotify.Authentication.ClientId = SpotifyClientId;
@@ -62,7 +76,7 @@ namespace SpotifyAcronymPlaylist.Controllers
 
 		    Spotify.AuthenticationToken authToken = await Spotify.Authentication.GetAccessToken(code);
 
-			Session.Add("Spotify.AuthenticationToken", authToken);
+			ControllerContext.HttpContext.Session.Add("Spotify.AuthenticationToken", authToken);
 
 			return new RedirectResult("/Playlist");
 	    }

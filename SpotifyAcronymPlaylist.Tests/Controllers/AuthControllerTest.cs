@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Routing;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -65,19 +66,79 @@ namespace SpotifyAcronymPlaylist.Tests.Controllers
 			resultUriQueryPart["response_type"].Should().Be("code");
 		}
 
-		private AuthController ArrangeAuthController()
+		[TestMethod]
+		public void LoginRedirectScopeQueryParameterShouldContain()
 		{
+			//Arrange
+			var controller = this.ArrangeAuthController();
+
+			var expectedScopes = new List<string>
+			{
+				"playlist-read-private",
+				"playlist-modify-public",
+				"playlist-modify-private",
+				"user-read-private"
+			};
+
+			//Act
+			RedirectResult result = controller.Login();
+
+			var resultUriQueryPart = UriHelper.GetQueryParameters(result.Url);
+
+			//Assert
+			resultUriQueryPart["scope"].Split(' ').Should().Contain(expectedScopes);
+		}
+
+		[TestMethod]
+		public async Task GetAuthenticationTokenShouldRedirectWithErrorMessageSetOnSessionOnEmptyCodeParameter()
+		{
+			//Arrange
+			var session = new Mock<HttpSessionStateBase>();
+			var controller = this.ArrangeAuthController(session);
+
+			//Act
+			RedirectResult result = await controller.GetAuthenticationToken("", "");
+
+			//Assert
+			session.VerifySet(x => x["ErrorMessage"] = It.IsAny<string>());
+			result.Url.Should().Be("/");
+		}
+
+		[TestMethod]
+		public async Task GetAuthenticationTokenShouldRedirectWithErrorMessageSetOnSessionOnErrorCodeParameterAccessDenied()
+		{
+			//Arrange
+			var session = new Mock<HttpSessionStateBase>();
+			var controller = this.ArrangeAuthController(session);
+
+			//Act
+			RedirectResult result = await controller.GetAuthenticationToken("", "access_denied");
+
+			//Assert
+			session.VerifySet(x => x["ErrorMessage"] = It.Is<string>(z => z == "Spotify Acronym Playlist needs your permission to be able to create playlists. Please try again"));
+			result.Url.Should().Be("/");
+		}
+
+		private AuthController ArrangeAuthController(Mock<HttpSessionStateBase> session = null)
+		{
+			if (session == null)
+			{
+				session = new Mock<HttpSessionStateBase>();
+			}
+
 			var uriBuilder = new UriBuilder("http://localhost/Auth/Login");
-
-			var httpContextBaseStub = new Mock<HttpContextBase>();
-			httpContextBaseStub.SetupGet(hcb => hcb.Request.Url).Returns(uriBuilder.Uri);
-
-			var controllerContext = new ControllerContext() { HttpContext = httpContextBaseStub.Object };
 
 			var urlHelperStub = new Mock<UrlHelper>();
 			urlHelperStub.Setup(uh => uh.Content("~")).Returns("/");
 
-			var controller = new AuthController() { ControllerContext = controllerContext, Url = urlHelperStub.Object };
+			var controller = new AuthController() { Url = urlHelperStub.Object };
+
+			var httpContextBaseStub = new Mock<HttpContextBase>();
+			httpContextBaseStub.SetupGet(hcb => hcb.Request.Url).Returns(uriBuilder.Uri);
+			httpContextBaseStub.Setup(x => x.Session).Returns(session.Object);
+			
+			var requestContext = new RequestContext(httpContextBaseStub.Object, new RouteData());
+			controller.ControllerContext = new ControllerContext(requestContext, controller) { HttpContext = httpContextBaseStub.Object };
 
 			return controller;
 		}

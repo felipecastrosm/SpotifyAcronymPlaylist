@@ -1,5 +1,20 @@
-﻿@{
+﻿@using SpotifyWebAPI
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<p>@ViewBag.User.Id</p>
+<p>Welcome, @ViewBag.UserId!</p>
+
+@if (ViewBag.AcronymPlaylist == null)
+{
+	<p>Whoops, we didn't find any Playlists with Tracks in your Spotify Account! Please create some Playlists or add some Tracks to your existing Playlists. We will use the songs on your Saved Playlists to create your Acronym Playlist.</p>
+}
+else
+{
+	<ul>
+		@foreach (Track track in ViewBag.AcronymPlaylist)
+		{
+			<li>@track.Name</li>
+		}
+	</ul>
+}

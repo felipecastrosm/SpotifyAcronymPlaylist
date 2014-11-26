@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using System.Web.Script.Serialization;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json.Linq;
 using SpotifyAcronymPlaylist.Controllers;
 using SpotifyAcronymPlaylist.Models;
 using SpotifyWebAPI;
@@ -91,22 +93,91 @@ namespace SpotifyAcronymPlaylist.Tests.Controllers
 			returnedTrackList.First().Id.Should().Be(sampleTrack.Id);
 		}
 
-		private PlaylistController ArrangePlaylistController(Mock<HttpSessionStateBase> session = null, List<Track> sampleTrackList = null)
+		[TestMethod]
+		public async Task SaveShouldReturnSuccessMessageOnSuccessfulPlaylistSave()
 		{
-			if (session == null)
-			{
-				session = new Mock<HttpSessionStateBase>();
-				var authenticationTokenStub = new Mock<AuthenticationToken>();
-				session.Setup(s => s["Spotify.AuthenticationToken"]).Returns(authenticationTokenStub.Object);
-			}
-
+			//Arrange
 			var spotifyIntegrationModelStub = new Mock<ISpotifyIntegrationModel>();
 			spotifyIntegrationModelStub.Setup(sim => sim.GetUserId(It.IsAny<AuthenticationToken>())).ReturnsAsync("testUserId");
-			spotifyIntegrationModelStub.Setup(sim => sim.GenerateAcronymPlaylist(It.IsAny<AuthenticationToken>())).ReturnsAsync(sampleTrackList);
+			spotifyIntegrationModelStub.Setup(
+				sim =>
+					sim.CreatePlaylist(It.IsAny<AuthenticationToken>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<List<string>>()))
+					.ReturnsAsync(true);
+
+			var controller = this.ArrangePlaylistController(spotifyIntegrationModelStub: spotifyIntegrationModelStub);
+
+			//Act
+			JsonResult result = await controller.Save("", false, new List<string>());
+
+			string jsonString = new JavaScriptSerializer().Serialize(result.Data);
+
+			var resultObject = JObject.Parse(jsonString);
+
+			//Assert
+			resultObject.SelectToken("status").ToString().Should().Be("s");
+			resultObject.SelectToken("message").ToString().Should().BeOfType<string>();
+			resultObject.SelectToken("message").ToString().Should().NotBeNullOrWhiteSpace();
+		}
+
+		[TestMethod]
+		public async Task SaveShouldReturnErrorMessageOnUnsuccessfulPlaylistSave()
+		{
+			//Arrange
+			var spotifyIntegrationModelStub = new Mock<ISpotifyIntegrationModel>();
+			spotifyIntegrationModelStub.Setup(sim => sim.GetUserId(It.IsAny<AuthenticationToken>())).ReturnsAsync("testUserId");
+			spotifyIntegrationModelStub.Setup(
+				sim =>
+					sim.CreatePlaylist(It.IsAny<AuthenticationToken>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<List<string>>()))
+					.ReturnsAsync(false);
+
+			var controller = this.ArrangePlaylistController(spotifyIntegrationModelStub: spotifyIntegrationModelStub);
+
+			//Act
+			JsonResult result = await controller.Save("", false, new List<string>());
+
+			string jsonString = new JavaScriptSerializer().Serialize(result.Data);
+
+			var resultObject = JObject.Parse(jsonString);
+
+			//Assert
+			resultObject.SelectToken("status").ToString().Should().Be("e");
+			resultObject.SelectToken("message").ToString().Should().BeOfType<string>();
+			resultObject.SelectToken("message").ToString().Should().NotBeNullOrWhiteSpace();
+		}
+
+		[TestMethod]
+		public async Task SaveShouldReturnNullForUnauthenticatedRequest()
+		{
+			//Arrange
+			var session = new Mock<HttpSessionStateBase>();
+			var controller = this.ArrangePlaylistController(session);
+
+			//Act
+			JsonResult result = await controller.Save("", false, new List<string>());
+
+			//Assert
+			result.Should().Be(null);
+		}
+
+		private PlaylistController ArrangePlaylistController(Mock<HttpSessionStateBase> sessionStub = null, List<Track> sampleTrackList = null, Mock<ISpotifyIntegrationModel> spotifyIntegrationModelStub = null)
+		{
+			if (sessionStub == null)
+			{
+				sessionStub = new Mock<HttpSessionStateBase>();
+				var authenticationTokenStub = new Mock<AuthenticationToken>();
+				sessionStub.Setup(s => s["Spotify.AuthenticationToken"]).Returns(authenticationTokenStub.Object);
+			}
+
+			if (spotifyIntegrationModelStub == null)
+			{
+				spotifyIntegrationModelStub = new Mock<ISpotifyIntegrationModel>();
+				spotifyIntegrationModelStub.Setup(sim => sim.GetUserId(It.IsAny<AuthenticationToken>())).ReturnsAsync("testUserId");
+				spotifyIntegrationModelStub.Setup(sim => sim.GenerateAcronymPlaylist(It.IsAny<AuthenticationToken>())).ReturnsAsync(sampleTrackList);
+			}
 
 			var controller = new PlaylistController(spotifyIntegrationModelStub.Object);
 
-			this.MockHttpContextAndRequestContextAndControllerContext(ref controller, session.Object);
+			this.MockHttpContextAndRequestContextAndControllerContext(ref controller, sessionStub.Object);
 
 			return controller;
 		}

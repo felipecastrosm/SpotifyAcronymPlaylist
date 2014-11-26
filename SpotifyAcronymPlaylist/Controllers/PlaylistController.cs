@@ -40,6 +40,11 @@ namespace SpotifyAcronymPlaylist.Controllers
 		{
 			var spotifyAuthenticationToken = (Spotify.AuthenticationToken)ControllerContext.HttpContext.Session["Spotify.AuthenticationToken"];
 
+			if (spotifyAuthenticationToken == null)
+			{
+				return null;
+			}
+
 			var playlistCreated = await this.SpotifyIntegrationModel.CreatePlaylist(spotifyAuthenticationToken, playlistName, isPublic, trackIds);
 
 			Dictionary<string, string> messageDictionary;

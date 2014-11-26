@@ -14,6 +14,8 @@ namespace SpotifyAcronymPlaylist.Models
 	{
 		public async Task<List<Spotify.Track>> GenerateAcronymPlaylist(Spotify.AuthenticationToken authenticationToken)
 		{
+			Spotify.Track defaultTrack = null;
+
 			var userPlaylists = await this.GetAllCurrentUserPlaylists(authenticationToken);
 
 			if (userPlaylists == null)
@@ -39,15 +41,26 @@ namespace SpotifyAcronymPlaylist.Models
 
 			foreach (var letter in displayName)
 			{
-				var track = playlistTracks.FirstOrDefault(t => t.Track.Name.ToLower().StartsWith(letter.ToString()));
+				//Ordering made to avoid repeating the same song if there are others available for the same letter
+				var playlistTrack = playlistTracks.OrderBy(pt => acronymPlaylist.Contains(pt.Track)).FirstOrDefault(pt => pt.Track.Name.ToLower().StartsWith(letter.ToString()));
 
-				if (track == null)
+				Spotify.Track track;
+
+				if (playlistTrack == null)
 				{
-					//TODO: Add default track if none was found with corresponding initial letter
-					//track = defaultTrack
+					if (defaultTrack == null)
+					{
+						defaultTrack = await Spotify.Track.GetTrack("0vGGptKFy2B0ETY1cn7n19");
+					}
+
+					track = defaultTrack;
+				}
+				else
+				{
+					track = playlistTrack.Track;
 				}
 
-				acronymPlaylist.Add(track.Track);
+				acronymPlaylist.Add(track);
 			}
 
 			return acronymPlaylist;

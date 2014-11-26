@@ -28,6 +28,9 @@ namespace SpotifyAcronymPlaylist.Controllers
 			}
 
 			ViewBag.UserId = await this.SpotifyIntegrationModel.GetUserId(spotifyAuthenticationToken);
+			var username = await this.SpotifyIntegrationModel.GetUserDisplayName(spotifyAuthenticationToken);
+
+			ViewBag.Username = username ?? ViewBag.UserId;
 
 			List<Spotify.Track> acronymTracks = await this.SpotifyIntegrationModel.GenerateAcronymPlaylist(spotifyAuthenticationToken);
 

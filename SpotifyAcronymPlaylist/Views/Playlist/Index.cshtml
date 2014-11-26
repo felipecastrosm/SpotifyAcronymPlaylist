@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h3>Welcome, <a href="https://play.spotify.com/user/@ViewBag.UserId" target="_blank">@ViewBag.UserId</a>!</h3>
+<h3>Welcome, <a href="https://play.spotify.com/user/@ViewBag.UserId" target="_blank">@ViewBag.Username</a>!</h3>
 <h4>Here is the playlist we just generated, customized for you:</h4>
 
 @if (ViewBag.AcronymPlaylist == null)
@@ -14,7 +14,7 @@
 }
 else
 {
-	using (Ajax.BeginForm("Save", "Playlist", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "HandleAjaxResponse" }))
+	using (Ajax.BeginForm("Save", "Playlist", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "HandleAjaxResponse", OnBegin = "SaveStarted", OnComplete = "SaveCompleted" }))
 	{
 		<ul>
 			@foreach (Track track in ViewBag.AcronymPlaylist)
@@ -28,12 +28,12 @@ else
 		<br/>
 		<h4>Save Playlist:</h4>
 		<label for="playlistName">Name:</label>
-		<input type="text" name="playlistName" id="playlistName"/><br />
-		<span>Privacy:</span><br />
-		<input type="radio" id="isPrivate" name="isPublic" value="false" />
+		<input type="text" name="playlistName" id="playlistName" required /><br />
+		<span style="font-weight: bold">Privacy:</span><br />
+		<input type="radio" id="isPrivate" name="isPublic" value="false" checked />
 		<label for="isPrivate">Private</label><br />
 		<input type="radio" id="isPublic" name="isPublic" value="true" />
 		<label for="isPublic">Public</label><br />
-		<input type="submit" value="Save Playlist"/>
+		<input type="submit" id="savePlaylistBtn" value="Save Playlist"/>
 	}
 }

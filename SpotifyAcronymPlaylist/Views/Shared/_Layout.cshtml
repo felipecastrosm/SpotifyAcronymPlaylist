@@ -35,7 +35,13 @@
         </div>
     </div>
 	<div class="container body-content">
-		<div id="messageHeader" style="display:none; text-align: center; width: 100%;"></div>
+		@if (Session["ErrorMessage"] != null)
+		{
+			<div style="text-align: center; width: 100%; height:40px; vertical-align: central; background-color: red">@Session["ErrorMessage"]</div>
+		}
+		
+		<div id="messageHeader" style="display:none; width: 100%; height: 40px; text-align: center; color: white; padding-top: 8px; font-size: 18px;"></div>
+		
 		@RenderBody()
 		<hr />
 		<footer>

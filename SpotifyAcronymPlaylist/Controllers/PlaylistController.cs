@@ -11,16 +11,16 @@ namespace SpotifyAcronymPlaylist.Controllers
 {
 	public class PlaylistController : Controller
 	{
-		public SpotifyIntegrationModel SpotifyIntegrationModel { get; set; }
+		public ISpotifyIntegrationModel SpotifyIntegrationModel { get; set; }
 
-		public PlaylistController(SpotifyIntegrationModel spotifyIntegrationModel)
+		public PlaylistController(ISpotifyIntegrationModel spotifyIntegrationModel)
 		{
 			this.SpotifyIntegrationModel = spotifyIntegrationModel;
 		}
 
 		public async Task<ActionResult> Index()
 		{
-			var spotifyAuthenticationToken = (Spotify.AuthenticationToken) Session["Spotify.AuthenticationToken"];
+			var spotifyAuthenticationToken = (Spotify.AuthenticationToken) ControllerContext.HttpContext.Session["Spotify.AuthenticationToken"];
 
 			if (spotifyAuthenticationToken == null)
 			{

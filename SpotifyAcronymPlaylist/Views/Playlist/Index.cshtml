@@ -1,9 +1,12 @@
-﻿@using SpotifyWebAPI
+﻿@using System.Web.UI.HtmlControls
+@using System.Web.UI.WebControls
+@using SpotifyWebAPI
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<p>Welcome, @ViewBag.UserId!</p>
+<h3>Welcome, <a href="https://play.spotify.com/user/@ViewBag.UserId" target="_blank">@ViewBag.UserId</a>!</h3>
+<h4>Here is the playlist we just generated, customized for you:</h4>
 
 @if (ViewBag.AcronymPlaylist == null)
 {
@@ -14,7 +17,7 @@ else
 	<ul>
 		@foreach (Track track in ViewBag.AcronymPlaylist)
 		{
-			<li>@track.Name</li>
+			<li><a href="http://open.spotify.com/track/@track.Id" target="_blank">@track.Name</a> by @Html.Raw(String.Join(", ", track.Artists.Select(a => "<a href=\"https://play.spotify.com/artist/" + a.Id + "\" target=\"_blank\">" + a.Name + "</a>")))</li>
 		}
 	</ul>
 }

@@ -10,8 +10,6 @@ namespace SpotifyAcronymPlaylist.Controllers
     {
         public ActionResult Index()
         {
-			//TODO: If Session["ErrorMessage"] is not null, show error message on View
-
             return View();
         }
     }

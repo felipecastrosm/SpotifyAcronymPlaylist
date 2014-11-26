@@ -35,5 +35,33 @@ namespace SpotifyAcronymPlaylist.Controllers
 
 			return View();
 		}
+
+		public async Task<JsonResult> Save(string playlistName, bool isPublic, List<string> trackIds, bool overwrite = false)
+		{
+			var spotifyAuthenticationToken = (Spotify.AuthenticationToken)ControllerContext.HttpContext.Session["Spotify.AuthenticationToken"];
+
+			var playlistCreated = await this.SpotifyIntegrationModel.CreatePlaylist(spotifyAuthenticationToken, playlistName, isPublic, trackIds);
+
+			Dictionary<string, string> messageDictionary;
+
+			if (playlistCreated)
+			{
+				messageDictionary = new Dictionary<string, string>
+				{
+					{"status", "s"},
+					{"message", "Playlist successfuly saved! Enjoy!"}
+				};
+			}
+			else
+			{
+				messageDictionary = new Dictionary<string, string>
+				{
+					{"status", "e"},
+					{"message", "Whoops! An error ocurred trying to save your Playlist. Please try again"}
+				};
+			}
+
+			return Json(messageDictionary);
+		}
 	}
 }

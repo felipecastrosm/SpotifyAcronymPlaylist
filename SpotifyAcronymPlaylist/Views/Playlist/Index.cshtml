@@ -14,10 +14,26 @@
 }
 else
 {
-	<ul>
-		@foreach (Track track in ViewBag.AcronymPlaylist)
-		{
-			<li><a href="http://open.spotify.com/track/@track.Id" target="_blank">@track.Name</a> by @Html.Raw(String.Join(", ", track.Artists.Select(a => "<a href=\"https://play.spotify.com/artist/" + a.Id + "\" target=\"_blank\">" + a.Name + "</a>")))</li>
-		}
-	</ul>
+	using (Ajax.BeginForm("Save", "Playlist", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "HandleAjaxResponse" }))
+	{
+		<ul>
+			@foreach (Track track in ViewBag.AcronymPlaylist)
+			{
+				<li>
+					<a href="http://open.spotify.com/track/@track.Id" target="_blank">@track.Name</a> by @Html.Raw(String.Join(", ", track.Artists.Select(a => "<a href=\"https://play.spotify.com/artist/" + a.Id + "\" target=\"_blank\">" + a.Name + "</a>")))
+					<input type="hidden" name="trackIds" value="@track.Id" />
+				</li>
+			}
+		</ul>
+		<br/>
+		<h4>Save Playlist:</h4>
+		<label for="playlistName">Name:</label>
+		<input type="text" name="playlistName" id="playlistName"/><br />
+		<span>Privacy:</span><br />
+		<input type="radio" id="isPrivate" name="isPublic" value="false" />
+		<label for="isPrivate">Private</label><br />
+		<input type="radio" id="isPublic" name="isPublic" value="true" />
+		<label for="isPublic">Public</label><br />
+		<input type="submit" value="Save Playlist"/>
+	}
 }

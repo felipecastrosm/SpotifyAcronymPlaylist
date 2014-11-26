@@ -118,5 +118,31 @@ namespace SpotifyAcronymPlaylist.Models
 
 			return playlists;
 		}
+
+		public async Task<bool> CreatePlaylist(Spotify.AuthenticationToken authenticationToken, string playlistName, bool isPublic, List<string> trackIds)
+		{
+			try
+			{
+				var userId = await this.GetUserId(authenticationToken);
+
+				var tracksToAdd = new List<Spotify.Track>();
+
+				foreach (var trackId in trackIds)
+				{
+					tracksToAdd.Add(await Spotify.Track.GetTrack(trackId));
+				}
+
+				Spotify.Playlist playlist = await Spotify.Playlist.CreatePlaylist(userId, playlistName, isPublic, authenticationToken);
+				await playlist.AddTracks(tracksToAdd, authenticationToken);
+			}
+			catch (Exception)
+			{
+				//TODO: Better handling of exceptions
+
+				return false;
+			}
+
+			return true;
+		}
 	}
 }

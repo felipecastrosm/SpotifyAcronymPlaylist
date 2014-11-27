@@ -12,7 +12,7 @@ namespace SpotifyAcronymPlaylist.Helpers
 			}
 			else
 			{
-				session["ErrorMessage"] += "\n" + message;
+				session["ErrorMessage"] += "<br />" + message;
 			}
 		}
 	}

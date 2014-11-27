@@ -10,6 +10,13 @@ namespace SpotifyAcronymPlaylist.Controllers
     {
         public ActionResult Index()
         {
+	        if (Session["ErrorMessage"] != null)
+	        {
+		        ViewBag.ErrorMessage = Session["ErrorMessage"];
+
+		        Session["ErrorMessage"] = null;
+	        }
+
             return View();
         }
     }

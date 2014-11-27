@@ -103,7 +103,7 @@ namespace SpotifyAcronymPlaylist.Models
 
 			var followersObject = JObject.Parse(followersJsonData);
 
-			//TODO: Não há forma conhecida de buscar informação de followers, e a URL retornada é sempre null - avaliar questão
+			//TODO: Spotify's Web API doesn't support requesting Followers information yet. This method will remain incomplete until the support is added.
 
 			return null;
 		}
